@@ -6,8 +6,8 @@ CREATE TABLE if not exists User (
     password VARCHAR(255) NOT NULL,
     firstName VARCHAR(50),
     lastName VARCHAR(50),
-    isHouseSitter BOOLEAN DEFAULT 0,
-	isHomeOwner BOOLEAN DEFAULT 0
+    isHomeOwner BOOLEAN DEFAULT 0,
+    isHouseSitter BOOLEAN DEFAULT 0
 );
 
 CREATE TABLE if not exists Role (
@@ -53,7 +53,7 @@ CREATE TABLE if not exists Booking (
     FOREIGN KEY (houseSitterId) REFERENCES HouseSitter(userId)
 );
 
-
+select * from user;
 
 
 
