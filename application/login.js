@@ -22,8 +22,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 body: JSON.stringify(loginData),
             });
 
-            const data = await response.json();
-            messageDiv.innerHTML = data.message;
+            if (response.status === 200) {
+                // Authentication successful
+                messageDiv.innerHTML = 'Login successful. Redirecting to home page...';
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            } else if (response.status === 401) {
+                // Authentication failed
+                const data = await response.json();
+                messageDiv.innerHTML = data.message;
+            }
         } catch (error) {
             console.error(error);
             messageDiv.innerHTML = 'An error occurred during login.';

@@ -5,13 +5,13 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const app = express();
 const mysql = require('mysql2/promise');
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy
+const cookieParser = require('cookie-parser');
 
 const port = 3000;
 
 app.use(express.json());
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 const db = mysql.createPool({
     host: 'localhost',
@@ -36,6 +36,7 @@ app.use(express.static(path.join(__dirname)));
 // Registration
 app.post('/register', async (req, res) => {
     const { firstname, lastname, email, password, ishomeowner, ishousesitter } = req.body;
+    console.log(firstname, lastname, email, password, ishousesitter, ishomeowner);
 
     try {
         // Check if the email already exists in the database
@@ -62,7 +63,7 @@ app.post('/register', async (req, res) => {
 
 
 
-// Login
+// Login route
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
@@ -77,13 +78,28 @@ app.post('/login', async (req, res) => {
         const hashedPassword = rows[0].password;
 
         // Use bcrypt.compare to compare the user-entered password with the hashed password
-        bcrypt.compare(password, hashedPassword, (err, result) => {
+        bcrypt.compare(password, hashedPassword, async(err, result) => {
             if (err) {
                 return res.status(500).json({ message: 'Error comparing passwords' });
             }
 
             if (result) {
-                return res.status(200).json({ message: 'Login successful' });
+                // Fetch the user's ID for creating a token
+                const [userRow] = await db.execute('SELECT userId FROM user WHERE email = ?', [email]);
+
+                if (!userRow || userRow.length === 0) {
+                    return res.status(401).json({ message: 'User not found' });
+                }
+
+                const user = userRow[0];
+
+                // Create a token with the user's data
+                const token = jwt.sign(user, 'your-secret-key', { expiresIn: '1h' });
+
+                // Set the token in an HTTP cookie
+                res.cookie('token', token, { httpOnly: true, secure: true, sameSite: 'Strict' });
+
+                return res.status(200).json();
             } else {
                 return res.status(401).json({ message: 'Incorrect password' });
             }
@@ -94,6 +110,16 @@ app.post('/login', async (req, res) => {
     }
 });
 
+// Profile routes
+app.get('/profile/:userId', (req, res) => {
+    // Retrieve and send user data for the given userId
+    // You'll need to query your database to fetch user information and send it to the profile page.
+});
+
+app.put('/profile/:userId', (req, res) => {
+    // Update user data for the given userId
+    // You'll need to update the user's data in the database based on the changes made in the profile page.
+});
 
 
 

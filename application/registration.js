@@ -33,10 +33,25 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             const data = await response.json();
-            messageDiv.innerHTML = data.message;
+
+
+            // Check if registration was successful
+            if (response.status === 201) {
+                // Registration successful
+                messageDiv.innerHTML = 'Registration successful. Redirecting to home page...';
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000); // Redirect after 2 seconds (adjust the delay as needed)
+            } else {
+                // Registration failed
+                messageDiv.innerHTML = data.message;
+            }
         } catch (error) {
             console.error(error);
             messageDiv.innerHTML = 'An error occurred during registration.';
         }
     });
 });
+
+
+
