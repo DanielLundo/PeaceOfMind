@@ -4,127 +4,117 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const app = express();
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy
 
 const port = 3000;
 
 app.use(express.json());
 app.use(bodyParser.json());
 
-// Serve static assets (CSS, images, JavaScript)
-app.use(express.static(path.join(__dirname)));
-
-// Define routes for your web app
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-app.get('/services', (req, res) => {
-    res.sendFile(path.join(__dirname, 'services.html'));
-});
-
-app.get('/sitters', (req, res) => {
-    res.sendFile(path.join(__dirname, 'sitters.html'));
-});
-
-app.get('/regsiter', (req, res) => {
-    res.sendFile(path.join(__dirname, 'register.html'));
-});
-
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'login.html'));
-});
-
-// Registration
-app.post('/register', (req, res) => {
-    const { firstname, lastname, email, password, ishomeowner, ishousesitter } = req.body;
-
-    // Check if the email already exists in the database
-    const checkEmailQuery = 'SELECT * FROM user WHERE email = ?';
-    db.query(checkEmailQuery, [email], (err, results) => {
-        if (err) {
-            console.error('Error querying the database:', err);
-            return res.status(500).json({ message: 'Database error' });
-        }
-
-        // If a user with the same email exists, return an error
-        if (results.length > 0) {
-            return res.status(400).json({ message: 'Email already in use' });
-        }
-
-        // Hash the password with bcrypt
-        bcrypt.hash(password, 10, (hashErr, hashedPassword) => {
-            if (hashErr) {
-                console.error('Error hashing the password:', hashErr);
-                return res.status(500).json({ message: 'Password hashing error' });
-            }
-
-            // Insert user data into the database
-            const insertUserQuery = 'INSERT INTO user (firstname, lastname, email, password) VALUES (?, ?, ?, ?)';
-            db.query(insertUserQuery, [firstname, lastname, email, hashedPassword, ishomeowner, ishousesitter], (insertErr, result) => {
-                if (insertErr) {
-                    console.error('Error inserting user data:', insertErr);
-                    return res.status(500).json({ message: 'Registration failed' });
-                }
-                console.log('User registered successfully');
-                return res.status(201).json({ message: 'Registration successful' });
-            });
-        });
-    });
-});
-
-// Login
-app.post('/login', (req, res) => {
-    const { email, password } = req.body;
-
-    // Query the database to find the user by email
-    const query = 'SELECT * FROM user WHERE email = ?';
-    db.query(query, [email], (err, results) => {
-        if (err) {
-            console.error('Error querying the database:', err);
-            return res.status(500).json({ message: 'Database error' });
-        }
-
-        // Check if a user with the provided email was found
-        if (results.length === 0) {
-            return res.status(401).json({ message: 'User not found' });
-        }
-
-        // Verify the password (you should use a secure password hashing method)
-        const user = results[0];
-        if (user.password !== password) {
-            return res.status(401).json({ message: 'Incorrect password' });
-        }
-
-        // Successful login
-        return res.status(200).json({ message: 'Login successful', user: user });
-    });
-});
-
-const db = mysql.createConnection({
+const db = mysql.createPool({
     host: 'localhost',
     user: 'pom',
     password: 'Pom#1234',
     database: 'peaceofmind',
 });
 
-db.connect((err) => {
-    if (err) {
-        console.error('Error connecting to MySQL:', err);
-        return;
+db.getConnection()
+    .then((connection) => {
+        console.log('Connected to MySQL database');
+        connection.release();
+    })
+    .catch((error) => {
+        console.error('Error connecting to the database:', error);
+    });
+    
+
+// Serve static assets (CSS, images, JavaScript)
+app.use(express.static(path.join(__dirname)));
+
+// Registration
+app.post('/register', async (req, res) => {
+    const { firstname, lastname, email, password, ishomeowner, ishousesitter } = req.body;
+
+    try {
+        // Check if the email already exists in the database
+        const [existingUser] = await db.execute('SELECT * FROM user WHERE email = ?', [email]);
+
+        if (existingUser.length > 0) {
+            return res.status(400).json({ message: 'Email already in use' });
+        }
+
+        // Hash the password with bcrypt
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insert user data into the database
+        const insertUserQuery = 'INSERT INTO user (firstname, lastname, email, password, ishomeowner, ishousesitter) VALUES (?, ?, ?, ?, ?, ?)';
+        await db.execute(insertUserQuery, [firstname, lastname, email, hashedPassword, ishomeowner, ishousesitter]);
+
+        console.log('User registered successfully');
+        return res.status(201).json({ message: 'Registration successful' });
+    } catch (error) {
+        console.error('Registration Error:', error);
+        return res.status(500).json({ message: 'Registration failed' });
     }
-    console.log('Connected to MySQL database');
 });
 
-// Close the database connection when the application exits
-process.on('SIGINT', () => {
-    db.end((err) => {
-        if (err) {
-            console.error('Error closing MySQL connection:', err);
+
+
+// Login
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        // Fetch the hashed password from the database based on the email
+        const [rows] = await db.execute('SELECT password FROM user WHERE email = ?', [email]);
+
+        if (rows.length === 0) {
+            return res.status(401).json({ message: 'User not found' });
         }
+
+        const hashedPassword = rows[0].password;
+
+        // Use bcrypt.compare to compare the user-entered password with the hashed password
+        bcrypt.compare(password, hashedPassword, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Error comparing passwords' });
+            }
+
+            if (result) {
+                return res.status(200).json({ message: 'Login successful' });
+            } else {
+                return res.status(401).json({ message: 'Incorrect password' });
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+});
+
+
+
+
+process.on('SIGINT', async () => {
+    try {
+        // Close the MySQL database connection
+        await db.end();
         console.log('MySQL connection closed');
+    } catch (error) {
+        console.error('Error closing MySQL connection:', error);
+    } finally {
+        // Exit the application
+        console.log('Application shut down gracefully');
         process.exit();
-    });
+    }
+});
+
+// Logout route
+app.get('/logout', (req, res) => {
+    req.logout();
+    res.redirect('/');
 });
 
 app.listen(port, () => {

@@ -1,15 +1,16 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const registrationForm = document.getElementById('registration-form');
+    const registrationForm = document.getElementById('registration');
     const messageDiv = document.getElementById('message');
 
     registrationForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        const firstname = document.getElementById('firstname').value;
-        const lastname = document.getElementById('lastname').value;
+
+        const firstname = document.getElementById('firstName').value;
+        const lastname = document.getElementById('lastName').value;
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
-        const isHouseSitter = document.getElementById('house-sitter').checked;
-        const isHomeOwner = document.getElementById('home-owner').checked;
+        const isHouseSitter = document.getElementById('ishousesitter').checked;
+        const isHomeOwner = document.getElementById('ishomeowner').checked;
 
         // Create an object to send registration data to the server
         const registrationData = {
@@ -17,8 +18,8 @@ document.addEventListener('DOMContentLoaded', function () {
             lastname,
             email,
             password,
-            isHouseSitter,
-            isHomeOwner
+            ishomeowner: isHomeOwner, // Ensure the property names match your server's expectations
+            ishousesitter: isHouseSitter,
         };
 
         try {
@@ -37,5 +38,5 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error(error);
             messageDiv.innerHTML = 'An error occurred during registration.';
         }
-    });   
+    });
 });
