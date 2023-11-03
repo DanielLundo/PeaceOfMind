@@ -1,0 +1,72 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: left;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  
+  .profile-picture {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 50%;
+    margin: 10px;
+  }
+  
+  .user-name {
+    font-size: 24px;
+  }
+  
+  .user-info {
+    font-size: 16px;
+  }
+
+  .homebutton {
+    font-size: 14px;
+    background: rgb(48, 48, 48);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+  
+  button {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+.small-button {
+    padding: 5px 10px;
+    font-size: 14px;
+  }
+  
+  .button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+  }
+  
+  .button-container button {
+    margin: 5px;
+  }
+  
+  

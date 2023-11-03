@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    text-align: center;
+    text-align: left;
 }
 
 h1, h2 {
@@ -19,9 +19,21 @@ nav {
     margin: 0;
 }
 
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
+}
+
 /* Style for each menu item (button) */
 .horizontal-menu li {
-    display: inline; /* Display items horizontally */
+    display: inline;
+    margin-right: 10px; 
+}
+.horizontal-menu li:last-child {
+    margin-right: 0;
 }
 
 /* Style for anchor tags (menu item buttons) */
@@ -113,3 +125,6 @@ li {
     background-color: #007bff;
     color: #fff;
 }
+
+
+

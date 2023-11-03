@@ -4,21 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration</title>
+    <link rel="stylesheet" type="text/css" href="login.css">
 </head>
 <body>
-    <h2>Registration</h2>
-    <form id="registration">
-        <input type="text" id="firstName" placeholder="First Name" required>
-        <input type="text" id="lastName" placeholder="Last Name" required>
-        <input type="email" id="email" placeholder="Email" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <label for="house-sitter">House Sitter:</label>
-        <input type="checkbox" id="ishousesitter" name="house-sitter">
-        <label for="home-owner">Home Owner:</label>
-        <input type="checkbox" id="ishomeowner" name="home-owner">
-        <button type="submit">Register</button>
-    </form>
-    <div id="message"></div>
+    <div class="card">
+        <h2>Registration</h2>      
+        <form id="registration">
+            <label for="firstname">First Name:</label>
+            <input type="text" id="firstname" required>
+            <label for="lastname">Last Name:</label>
+            <input type="text" id="lastname" required>
+            <label for="email">Email:</label>
+            <input type="email" id="email" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" required>
+            <label for="house-sitter">House Sitter:</label>
+            <input type="checkbox" id="ishousesitter" name="house-sitter">
+            <label for="home-owner">Home Owner:</label>
+            <input type="checkbox" id="ishomeowner" name="home-owner">
+            <button type="submit">Register</button>
+            <div id="server-message" class="server-message"></div>
+        </form>
+        <p>Have an account? <a href="/login.html">Log in</a></p>
+    </div>
     <script src="registration.js"></script>
 </body>
 </html>

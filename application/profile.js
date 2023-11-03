@@ -12,7 +12,22 @@ document.addEventListener('DOMContentLoaded', function () {
     const saveButton = document.getElementById('save-profile-button');
 
     // Fetch and display user information
-    // You'll need to make an API call to retrieve user data from the server and update these elements.
+    const userId = window.location.pathname.split('/').pop(); // Extract the userId from the URL
+    fetch(`/profile/${userId}`)
+        .then((response) => response.json())
+        .then((userData) => {
+            // Update the profile page with userData
+            userName.textContent = userData.name; // Assuming 'name' is the user's full name in the response
+            userAge.textContent = userData.age; // Assuming 'age' is the user's age in the response
+            userDescription.textContent = userData.description; // Assuming 'description' is the user's description in the response
+
+            // You may also need to update profilePicture if it's an image URL in userData
+            // profilePicture.src = userData.profilePicture; // Assuming 'profilePicture' is the image URL
+        })
+        .catch((error) => {
+            console.error(error);
+            // Handle errors
+        });
 
     // Toggle visibility of edit form
     editButton.addEventListener('click', () => {

@@ -1,12 +1,12 @@
 document.addEventListener('DOMContentLoaded', function () {
     const registrationForm = document.getElementById('registration');
-    const messageDiv = document.getElementById('message');
+    const serverMessageDiv = document.getElementById('server-message');
 
     registrationForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        const firstname = document.getElementById('firstName').value;
-        const lastname = document.getElementById('lastName').value;
+        const firstname = document.getElementById('firstname').value;
+        const lastname = document.getElementById('lastname').value;
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const isHouseSitter = document.getElementById('ishousesitter').checked;
@@ -38,17 +38,17 @@ document.addEventListener('DOMContentLoaded', function () {
             // Check if registration was successful
             if (response.status === 201) {
                 // Registration successful
-                messageDiv.innerHTML = 'Registration successful. Redirecting to home page...';
+                serverMessageDiv.innerHTML = 'Registration successful. Redirecting to home page...';
                 setTimeout(() => {
                     window.location.href = '/';
                 }, 2000); // Redirect after 2 seconds (adjust the delay as needed)
             } else {
                 // Registration failed
-                messageDiv.innerHTML = data.message;
+                serverMessageDiv.innerHTML = data.message;
             }
         } catch (error) {
             console.error(error);
-            messageDiv.innerHTML = 'An error occurred during registration.';
+            serverMessageDiv.innerHTML = 'An error occurred during registration.';
         }
     });
 });

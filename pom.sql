@@ -10,50 +10,37 @@ CREATE TABLE if not exists User (
     isHouseSitter BOOLEAN DEFAULT 0
 );
 
-CREATE TABLE if not exists Role (
-    roleId INT AUTO_INCREMENT PRIMARY KEY,
-    roleName VARCHAR(50) NOT NULL
-);
 
-CREATE TABLE if not exists Calendar (
-    calendarId INT AUTO_INCREMENT PRIMARY KEY,
-    ownerUserId INT,
-    FOREIGN KEY (ownerUserId) REFERENCES User(userId)
-);
 
 CREATE TABLE if not exists HouseSitter (
-    userId INT PRIMARY KEY,
-    houseSitterID INT,
+    houseSitterID INT AUTO_INCREMENT PRIMARY KEY,
+    userId INT,
     experience varchar(255),
-    availability varchar(30),
-    reviews varchar(255),
-    calendarId INT,
-    roleId INT,
+    bookingId INT,
     FOREIGN KEY (userId) REFERENCES User(userId),
-    FOREIGN KEY (roleId) REFERENCES Role(roleId),
-    FOREIGN KEY (calendarId) REFERENCES Calendar(calendarId)
+    FOREIGN KEY (bookingId) REFERENCES Bookings(bookingId)
 );
 
-CREATE TABLE if not exists HomeOwner (
-    userId INT PRIMARY KEY,
-    roleId INT,
-    description varchar(255),
-    FOREIGN KEY (userId) REFERENCES User(userId),
-    FOREIGN KEY (roleId) REFERENCES Role(roleId)
-);
 
-CREATE TABLE if not exists Booking (
-    bookingId INT AUTO_INCREMENT PRIMARY KEY,
-    homeownerId INT,
-    houseSitterId INT,
-    startDate DATE,
-    endDate DATE,
-    status ENUM('Pending', 'Accepted', 'Declined', 'Completed') DEFAULT 'Pending',
-    FOREIGN KEY (homeownerId) REFERENCES HomeOwner(userId),
-    FOREIGN KEY (houseSitterId) REFERENCES HouseSitter(userId)
+
+CREATE TABLE Bookings (
+    BookingId INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT, -- The user making the booking
+    start_date DATE,
+    end_date DATE,
+    FOREIGN KEY (userId) REFERENCES User(userId)
 );
 
 select * from user;
+delete from user where userId = 13;
+
+drop table booking;
+drop table homeowner;
+drop table housesitter;
+drop table calendar;
+drop table role;
+drop table user;
+
 
 
 

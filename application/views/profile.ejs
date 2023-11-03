@@ -4,16 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
+    <link rel="stylesheet" type="text/css" href="/profile.css">
 </head>
 <body>
-    <homebutton id="home-button">Home</homebutton>
+    <button class="homebutton" id="home-button">Home</button>
     <h1>User Profile</h1>
     
     <!-- Display user information -->
     <img id="profile-picture" src="" alt="Profile Picture">
-    <p id="user-name">Name: <span id="user-name-value"></span></p>
-    <p id="user-age">Age: <span id="user-age-value"></span></p>
-    <p id="user-description">Description: <span id="user-description-value"></span></p>
+    <p id="user-name">Name: <%= userData[0].firstname %> <%= userData[0].lastname %>
+    <p id="user-age">Age: <%= userData[0].age %></p>
+    <p id="user-description">Description: <%= userData.description %></p>
+    <div class="button-container">
+        <a href="/booking.html"><button>Book Now</button></a>
+        <a href="/reviews.html"><button>View Reviews</button></a>
+      </div>
 
     <!-- Edit user information (visible to authorized users) -->
     <button id="edit-profile-button">Edit Profile</button>
@@ -24,5 +29,11 @@
         <textarea id="edit-description" placeholder="Description"></textarea>
         <button id="save-profile-button">Save Profile</button>
     </div>
+    <script>
+        // JavaScript code to handle the "Home" button click
+        document.getElementById('home-button').addEventListener('click', function () {
+            window.location.href = '/';
+        });
+    </script>
 </body>
 </html>

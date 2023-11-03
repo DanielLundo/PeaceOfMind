@@ -6,12 +6,16 @@ const jwt = require('jsonwebtoken');
 const app = express();
 const mysql = require('mysql2/promise');
 const cookieParser = require('cookie-parser');
+const { authorize } = require('passport');
+const ejs = require('ejs');
 
 const port = 3000;
 
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 const db = mysql.createPool({
     host: 'localhost',
@@ -110,15 +114,82 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// Profile routes
-app.get('/profile/:userId', (req, res) => {
-    // Retrieve and send user data for the given userId
-    // You'll need to query your database to fetch user information and send it to the profile page.
+
+function authorized(req, res, next) {
+    const token = req.cookies.token;
+  
+    if (!token) {
+      return res.status(401).json({ message: 'Unauthorized: No token provided' });
+    }
+  
+    jwt.verify(token, 'your-secret-key', (err, decoded) => {
+      if (err) {
+        return res.status(403).json({ message: 'Forbidden: Invalid token' });
+      }
+  
+      req.user = decoded;
+  
+      next();
+    });
+}
+
+app.get('/getUserId', authorized, (req, res) => {
+    // Retrieve the user's ID from the authorized request (you may have stored it in req.user)
+    const userId = req.user.userId;
+    // Respond with the user's ID as JSON
+    res.json({ userId });
 });
 
-app.put('/profile/:userId', (req, res) => {
+// Profile routes
+app.get('/profile/:userId', authorized, async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const [userData] = await db.execute('SELECT * FROM user WHERE userId = ?', [userId]);
+
+        if (userData.length === 0) {           
+            return res.status(404).send('User not found');
+        }
+   
+        res.render('profile.ejs', { userData });
+
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        
+        res.status(500).send('Server error');
+    }
+});
+
+app.put('/profile/:userId', authorized, (req, res) => {
     // Update user data for the given userId
     // You'll need to update the user's data in the database based on the changes made in the profile page.
+});
+
+// Handle booking creation
+app.post('/bookings', (req, res) => {
+    const { userId, startDate, endDate } = req.body;
+
+    // Check if the requested dates are available
+
+    // If available, insert the booking into the database
+    const insertBookingQuery = 'INSERT INTO bookings (user_id, start_date, end_date) VALUES (?, ?, ?)';
+    db.execute(insertBookingQuery, [userId, startDate, endDate])
+        .then(() => {
+            res.status(201).json({ message: 'Booking created successfully' });
+        })
+        .catch((error) => {
+            console.error('Error creating booking:', error);
+            res.status(500).json({ message: 'Booking creation failed' });
+        });
+});
+
+// Handle checking date availability
+app.get('/availability', (req, res) => {
+    const { startDate, endDate } = req.query;
+
+    // Query the database to check if the requested dates are available
+
+    // Return availability status
+    res.json({ available: true }); // Modify this based on your database query
 });
 
 
@@ -139,7 +210,7 @@ process.on('SIGINT', async () => {
 
 // Logout route
 app.get('/logout', (req, res) => {
-    req.logout();
+    res.clearCookie('token')
     res.redirect('/');
 });
 
